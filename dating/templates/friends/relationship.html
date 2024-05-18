@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="">
+        <h1>My Relationship</h2>
+        <form method="post">
+            {% csrf_token %}
+        
+
+        <h2> You have {{friends_number}} matches. </h2>
+        
+        {% for friend in friends %}
+            <div class="mt-3">
+            <img class="rounded-circle account-img" src={{friend.profile.image.url}} >
+        
+            <a class="text-danger" href="{% url 'user-info2' friend.username %}" > 
+            <h3>{{ friend.get_full_name }}</h3>
+            </a>
+            <a href="{% url 'start-chat' friend.username %}">
+                <button type="button" class="btn btn-outline-primary"><i class="fa-regular fa-envelope"></i></button>
+            </a>
+            <a href="{% url 'my-removal' operation='remove' pk=friend.pk %}">
+                <button type="button" class="btn btn-outline-danger"><i class="fa-solid fa-x"></i></button>
+            </a>
+        </div>
+       
+        {% endfor %}
+            <br></br><br></br>
+        <h2>You received {{received_num}} like(s)</h2>
+        {% for user in received_requests %}
+        <div class="mt-3">
+            <img class="rounded-circle account-img" src={{user.sender.profile.image.url}} >
+            </a>
+            <a href="{% url 'user-info2' user.sender %}">
+            <h3>{{ user.sender.get_full_name }}</h3>
+            <a href="{% url 'my-add' operation='add' pk=user.sender.pk %}">
+            <button type="button" class="btn btn-outline-primary"><i class="fa-solid fa-check"></i></button>
+            </a>
+            <a type="button" class="btn btn-outline-danger" href="{% url 'my-request-removal' operation='remove-received-requests' pk=user.sender.pk %}" class="btn btn-dark btn-sm"><i class="fa-solid fa-x"></i></a>
+            </a>
+        </div>
+        {% endfor %}
+        <br></br><br></br>
+        <h2>You sent {{sent_num}} like(s)</h2>
+        {% for user in sent_requests %}
+            {% if user %}
+            <div>
+                <img class="rounded-circle account-img" src={{user.receiver.profile.image.url}} >
+                <a class="text-danger" href="{% url 'user-info2' user.receiver %}"><h3>{{ user.receiver.get_full_name }}</h3></a>
+                
+                <i class="fa-solid fa-heart-crack"> <a href="{% url 'my-request-removal' operation='remove-sent-requests' pk=user.receiver.pk %}">Dislike</a></i>
+                
+                <!-- <a href="#">Dislike</a> -->
+                <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
+                <script type="text/javascript">
+                    $(document).ready(function(){
+                        $('a').click(function(){
+                            $('a').toggleClass('active')
+                        })
+                })
+                </script>
+
+            </div>
+            <br>
+            {% endif %}
+        {% endfor %}
+        <br></br><br></br>
+
+        <h2> Total Users </h2>
+     
+        {% if request.user.profile.gender == "MAN" %}
+            {% for user in all_users %}
+                {% if user.profile.gender == "WOMAN" %}
+                <br>
+                <img class="rounded-circle account-img" src={{user.profile.image.url}} >
+                <a class="text-danger" href="{% url 'user-info2' user.username %}"><h3>{{ user.get_full_name }}</h3></a>
+                
+                <i class="fa-regular fa-heart"> <a class="text-decoration" href="{% url 'my-request' pk=user.pk %}">Like</a></i>
+                
+                <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
+                <script type="text/javascript">
+                    $(document).ready(function(){
+                        $('a').click(function(){
+                            $('a').toggleClass('active')
+                        })
+                    })
+                </script>        
+                <br>
+                {% else %}
+                    
+                {% endif %}
+            {% endfor %}
+        {% elif request.user.profile.gender == "WOMAN" %}
+            {% for user in all_users %}
+                {% if user.profile.gender == "MAN" %}
+                <br>
+                <img class="rounded-circle account-img" src={{user.profile.image.url}} >
+                <a class="text-danger" href="{% url 'user-info2' user.username %}"><h3>{{ user.get_full_name }}</h3></a>
+                
+                <i class="fa-regular fa-heart"> <a class="text-decoration" href="{% url 'my-request' pk=user.pk %}">Like</a></i>
+                
+                <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
+                <script type="text/javascript">
+                    $(document).ready(function(){
+                        $('a').click(function(){
+                            $('a').toggleClass('active')
+                        })
+                    })
+                </script>        
+                <br>
+                {% else %}
+                    
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            {% for user in all_users %}
+                
+                <br>
+                <img class="rounded-circle account-img" src={{user.profile.image.url}} >
+                <a class="text-danger" href="{% url 'user-info2' user.username %}"><h3>{{ user.get_full_name }}</h3></a>
+                
+                <i class="fa-regular fa-heart"> <a class="text-decoration" href="{% url 'my-request' pk=user.pk %}">Like</a></i>
+                
+                <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
+                <script type="text/javascript">
+                    $(document).ready(function(){
+                        $('a').click(function(){
+                            $('a').toggleClass('active')
+                        })
+                    })
+                </script>        
+                <br>
+                
+            {% endfor %}
+        {% endif %}
+            <br></br><br></br>            
+
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <br></br> 
+    <div class="col-md-8">
+        <form method="get">
+            
+            {{ form.as_p}}
+            <button class="btn btn-outline-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button class="btn btn-outline-warning" type="button" onclick="clearSearch()"><i class="fa-solid fa-eraser"></i></button>
+        </form>
+        
+    </div>
+
+    <br>
+        <ul>
+            {% for profile in results %}
+            
+                <li><a href="{% url 'user_detail' pk=profile.user.pk %}">{{ profile.user.get_full_name }}</a></li>
+            {% empty %}
+                <li>Không tìm thấy kết quả nào.</li>
+            {% endfor %}
+        </ul>
+
+    <script>
+        // Hàm JavaScript để xóa thông tin đã nhập
+        function clearSearch() {
+            // Giả sử rằng 'query' là id của ô input tìm kiếm
+            document.getElementById('query').value = '';
+        }
+    </script>
+
+{% endblock content %}

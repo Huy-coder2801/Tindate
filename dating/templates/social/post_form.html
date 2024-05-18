@@ -1,0 +1,15 @@
+<!-- important!!! enctype="multipart/form-data"-->
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="mt-3 col-md-8">
+    <h1> Post a new moment </h1>
+    <form method='POST' enctype="multipart/form-data">
+        {% csrf_token %} 
+        {{ form|crispy }}
+        <button class="btn btn-outline-success" type="submit">Post</button>
+    </form>
+
+</div>
+
+{% endblock %}

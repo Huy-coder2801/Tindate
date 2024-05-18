@@ -1,0 +1,164 @@
+{% extends "home.html" %}
+{% block content1 %}
+
+{% load static %}
+<script src="https://unpkg.com/htmx.org/dist/htmx.js" integrity="sha384-qbtR4rS9RrUMECUWDWM2+YGgN3U4V4ZncZ0BvUcg9FGct0jqXz3PUdVpU1p0yrXS" crossorigin="anonymous"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<wrapper class="mt-3 align-self-center">
+    <h1>{{ request.other_user.profile.get_full_name}} 1</h1>
+    {% if chat_group.group_name %}
+    <div class="flex justify-between">
+        <h2>{{ chat_group.groupchat_name }}</h2>
+        {% if user == chat_group.admin %}
+        
+            <div class="p-2 bg-gray-200 hover:bg-blue-600 rounded-lg group">
+                <a href="{% url 'edit-chatroom' chat_group.group_name %}"></a>
+                <svg class="fill-gray-500 group-hover:fill-white" width="16" height="16">
+                    <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                </svg>
+            </div>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+    <div class="block max-w-2xl mx-auto my-10 px-6">
+        <div id="chat_window" class="h-[45rem] flex flex-col bg-gray-800 rounded-2xl shadow-2xl relative p-1">
+            <div class="flex justify-center text-emerald-400 bg-gray-800 p-2 sticky top-0 z-10">
+                {% if other_user %}
+                <div id="online-icon" class="absolute top-2 left-2 rounded-full bg-green-500 p-1.5"></div>
+                
+                <a href="{% url 'user-info2' other_user.username %}">
+                    <div class="flex items-center gap-2 p-4 sticky top-0 z-10">
+                        <img class="w-10 h-10 rounded-full object-cover" src="{{ other_user.profile.image.url }}" />
+                        <div>
+                            <span class="font-bold text-white">{{ other_user.profile.name }}</span>
+                            <span class="text-sm font-light text-gray-400">@{{ other_user.username }}</span>
+                        </div>
+                    </div>
+                </a>
+                {% elif chat_group.group_name %}
+                <ul id="groupchat-members" class="flex gap-4">
+                    {% for member in chat_group.members.all %}
+                    <li>
+                        <a href="{% url 'user-info2' member.username %}" class="flex flex-col text-gray-400 items-center justify-center w-20 gap-2">
+                            <img src="{{ member.profile.image.url }}" class="w-14 h-14 rounded-full object-cover" />
+                            {{ member.profile.name|slice:":10" }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div id="online-icon" class="gray-dot absolute top-2 left-2"></div>
+                <span id="online-count" class="pr-1"></span>online
+                {% endif %}
+            </div>
+            <div id='chat_container' class="overflow-y-auto grow">
+                <ul id='chat_messages' class="flex flex-col justify-end gap-2 p-3">
+                    {% for message in chat_messages reversed %}
+                    {% include 'chat/chat_message.html' %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="sticky bottom-0 z-10 p-2 bg-gray-800">
+                <div class="d-flex items-center rounded-xl px-2 py-2">
+                    <form id="chat_message_form" class="w-full"
+                          hx-ext="ws"
+                          ws-connect="/ws/chat/{{ chatroom_name }}/"
+                          ws-send
+                          _="on htmx:wsAeforeSend reset() me">
+                        {% csrf_token %}
+                        <input type="text" name="body" class="w-full bg-gray-700 text-white rounded-full py-2 px-4" placeholder="Type a message...">
+                    </form>
+                </div>
+                <div>
+                    <form id="chat_file_form" enctype="multipart/form-data" class="d-flex justify-content-between w-full"
+                          hx-post="{% url 'chat-file-upload' chat_group.group_name %}"
+                          hx-target="#chat_messages"
+                          hx-swap="beforeend"
+                          _="on htmx:beforeSend reset() me">
+                        {% csrf_token %}
+                        <input type="file" name="file" id="id_file" class="form-control me-2 text-gray-400">
+                        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if chat_group.members.exists %}
+    <a href="{% url 'chatroom-leave' chat_group.group_name %}">
+        {% include 'chat/partials/modal_chat_leave.html' %}
+    </a>
+    {% endif %}
+</wrapper>
+
+<script>
+    function scrollToBottom(time = 0) {
+        setTimeout(function() {
+            const container = document.getElementById('chat_container');
+            container.scrollTop = container.scrollHeight;
+        }, time);
+    }
+    scrollToBottom();
+
+    // Function to establish WebSocket connection
+    function connectWebSocket() {
+        const chatRoom = '{{ chatroom_name }}';
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + chatRoom + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatMessages = document.querySelector('#chat_messages');
+            chatMessages.innerHTML += data.html;
+            scrollToBottom(100); // Scroll to bottom when new message received
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+            // Attempt to reconnect after a delay
+            setTimeout(connectWebSocket, 3000); // Retry after 3 seconds
+        };
+
+        return chatSocket;
+    }
+
+    // Initialize WebSocket connection
+    let chatSocket = connectWebSocket();
+
+    // Function to handle form submission
+    function handleFormSubmission(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const message = formData.get('body');
+        if (message.trim() !== '') {
+            chatSocket.send(JSON.stringify({
+                'body': message
+            }));
+            this.reset(); // Reset the form after sending the message
+        }
+    }
+
+    // Event listener for form submission
+    document.querySelector('#chat_message_form').addEventListener('submit', handleFormSubmission);
+
+    chatSocket.onmessage = function(event) {
+        console.log('Received data from WebSocket:', event.data);
+        const data = JSON.parse(event.data);
+
+        if (data && data.html) {
+            const tempElement = document.createElement('div');
+            tempElement.innerHTML = data.html;
+
+            const onlineCountElement = tempElement.querySelector('#online-count');
+            if (onlineCountElement) {
+                const onlineCountValue = onlineCountElement.innerText.trim();
+                const actualOnlineCountElement = document.getElementById('online-count');
+                actualOnlineCountElement.innerText = onlineCountValue;
+            }
+        }
+    };
+</script>
+
+{% endblock content1 %}

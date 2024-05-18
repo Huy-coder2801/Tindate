@@ -1,0 +1,60 @@
+
+{% extends "base.html" %}
+{% load static %}
+<!-- <link rel="stylesheet" type="text/css" href="{% static 'accounts/like.css' %}"> -->
+
+{% block content1 %}
+    {% if not user.is_authenticated%}
+        <h1> Welcome to  DATE, anonymous! </h1>
+    {% else %}
+        <h1> Welcome to DATE, {{user.get_full_name}} </h1>
+    {% endif %}
+        <div class="row">
+            <div class="col-8">
+                <br></br><br></br><br></br> 
+                <video src= "/media/comingsoon.mp4" width=800 muted autoplay loop></video> 
+            </div>
+            <div class="col-4">
+                <div class="content-section">
+                    <h3>Weekly TOP 3 Popular</h3>
+                    <p class='text-muted'>Information of user
+                    <ul class="list-group">
+                      
+                                  
+                      <li class="list-group-item list-group-item-light"><img class = "rounded-circle article-img" src="{{top1_user.profile.image.url}}"></li>
+                      <li class="list-group-item list-group-item-light">Name: {{top1_user.get_full_name}}</li>
+                      <li class="list-group-item list-group-item-light">Gender: {{top1_user.profile.gender}}</li>
+                      <li class="list-group-item list-group-item-light">Age: {{top1_user.profile.age}}</li>
+                      <li class="list-group-item list-group-item-light">Bio: {{top1_user.profile.bio}}</li>
+                      <li class="list-group-item list-group-item-light">Like Received: {{top1_num}}</li>
+                      <hr>
+                      <li class="mt-3 list-group-item list-group-item-light"><img class = "rounded-circle article-img" src="{{top2_user.profile.image.url}}"></li>
+                      <li class="list-group-item list-group-item-light">Name: {{top2_user.get_full_name}}</li>
+                      <li class="list-group-item list-group-item-light">Gender: {{top2_user.profile.gender}}</li>
+                      <li class="list-group-item list-group-item-light">Age: {{top2_user.profile.age}}</li>
+                      <li class="list-group-item list-group-item-light">Bio: {{top2_user.profile.bio}}</li>
+                      <li class="list-group-item list-group-item-light">Like Received: {{top2_num}}</li>
+                      <hr>
+                      <li class="mt-3 list-group-item list-group-item-light"><img class = "rounded-circle article-img" src="{{top3_user.profile.image.url}}"></li>
+                      <li class="list-group-item list-group-item-light">Name: {{top3_user.get_full_name}}</li>
+                      <li class="list-group-item list-group-item-light">Gender: {{top3_user.profile.gender}}</li>
+                      <li class="list-group-item list-group-item-light">Age: {{top3_user.profile.age}}</li>
+                      <li class="list-group-item list-group-item-light">Bio: {{top3_user.profile.bio}}</li>
+                      <li class="list-group-item list-group-item-light">Like Received: {{top3_num}}</li>
+                    </ul>
+                    </p>
+                </div>
+                </div>
+        </div>
+        
+        
+
+        
+          
+       
+        
+      
+    
+    
+
+{% endblock  %}
